@@ -2834,6 +2834,8 @@ parse_NCName(Bytes = <<14:4, _:4, 2:2, _:6>>, _, _, State) ->
     ?FSTNAMECHARPARTFUN(1, parse_Name);
 parse_NCName(Bytes = <<6:3, _:5>>, _, _, State) ->
     ?FSTNAMECHARPARTFUN(1, parse_Name);
+parse_NCName(no_bytes, _, _, _State) ->
+    throw(incomplete_element);
 parse_NCName(_, _, _, State) ->
     fatal_error(bad_name, State).
 
@@ -2890,6 +2892,8 @@ parse_NCName(<<Char/utf8, Rest/bitstring>> = Bytes, Stream, Pos, Len, State, Acc
             Acc1 = ?ACC(Stream, Pos, Len, Acc),
             {to_binary(Acc1), Bytes, Stream, Pos + Len, State}
     end;
+parse_NCName(no_bytes, _Stream, _Pos, _Len, _State, _Acc) ->
+    throw(incomplete_element);
 parse_NCName(<<>>, Stream, Pos, Len, State, Acc) ->
     Acc1 = ?ACC(Stream, Pos, Len, Acc),
     {Stream1, State1} = cf(State),
