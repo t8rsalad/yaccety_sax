@@ -2039,6 +2039,8 @@ parse_element_lt_no_ns(?MATCH) ->
     {{NameP, NameL}, ?MATCH1} = parse_QName(?MATCH),
     QName = {<<>>, NameP, NameL},
     case Bytes1 of
+        <<>> ->
+            throw(incomplete_element);
         <<$>/utf8, Bytes2/bitstring>> ->
             State2 = State1#ys_state{
                 position = [?content | P],
@@ -2060,6 +2062,8 @@ parse_element_lt_no_ns(?MATCH) ->
         _ ->
             {As, ?MATCH2} = parse_attributes_no_ns(?MATCH1, []),
             case Bytes2 of
+                <<>> ->
+                    throw(incomplete_element);
                 <<$>/utf8, Bytes3/bitstring>> ->
                     State3 = State2#ys_state{
                         position = [?content | P],
@@ -2096,6 +2100,8 @@ parse_element_lt(
 ) ->
     {{NameP, NameL}, ?MATCH1} = parse_QName(?MATCH),
     case Bytes1 of
+        <<>> ->
+            throw(incomplete_element);
         <<$>/utf8, Bytes2/bitstring>> ->
             QName = expand_qname(NameP, NameL, LastNss),
             State2 = State1#ys_state{
@@ -2132,6 +2138,8 @@ parse_element_lt(
             As1 = qualify_attribute_names(As, NamespaceMap),
             ok = check_attributes(As1, State2),
             case Bytes2 of
+                <<>> ->
+                    throw(incomplete_element);
                 <<$>/utf8, Bytes3/bitstring>> ->
                     State3 = State2#ys_state{
                         position = [?content | P],
@@ -2182,6 +2190,8 @@ parse_element_lt(?MATCH) ->
     As1 = qualify_attribute_names(As, NamespaceMap),
     ok = check_attributes(As1, State2),
     case Bytes2 of
+        <<>> ->
+            throw(incomplete_element);
         <<$>/utf8, Bytes3/bitstring>> ->
             State3 = State2#ys_state{
                 position = [?content | P],
@@ -2553,7 +2563,7 @@ parse_AttValue(<<$"/utf8, Rest/bitstring>>, Stream, Pos, State, DTD, External) -
 parse_AttValue(<<>>, _, _, State, DTD, External) ->
     {Stream1, State1} = cf(State),
     parse_AttValue(Stream1, Stream1, 0, State1, DTD, External);
-parse_AttValue(no_bytes, _, _, State, _DTD, _External) ->
+parse_AttValue(no_bytes, _, _, _State, _DTD, _External) ->
     throw(incomplete_element);
 parse_AttValue(_, _, _, State, _DTD, _External) ->
     fatal_error(bad_attval, State).
