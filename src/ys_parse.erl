@@ -512,6 +512,8 @@ parse_Name(Bytes = <<14:4, _:4, 2:2, _:6>>, _, _, State) ->
     ?FSTNAMECHARPARTFUN(1, parse_Name);
 parse_Name(Bytes = <<6:3, _:5>>, _, _, State) ->
     ?FSTNAMECHARPARTFUN(1, parse_Name);
+parse_Name(no_bytes, _, _, _) ->
+    throw(incomplete_element);
 parse_Name(Bytes, _, _, State) ->
     fatal_error(bad_name, {Bytes, State}).
 
@@ -2389,6 +2391,8 @@ parse_AttValue(<<$"/utf8, Rest/bitstring>>, Stream, Pos, State) ->
 parse_AttValue(<<>>, _, _, State) ->
     {Stream1, State1} = cf(State),
     parse_AttValue(Stream1, Stream1, 0, State1);
+parse_AttValue(no_bytes, _Stream, _Pos, _State) ->
+    throw(incomplete_element);
 parse_AttValue(_, _, _, State) ->
     fatal_error(bad_attval, State).
 
@@ -2549,6 +2553,8 @@ parse_AttValue(<<$"/utf8, Rest/bitstring>>, Stream, Pos, State, DTD, External) -
 parse_AttValue(<<>>, _, _, State, DTD, External) ->
     {Stream1, State1} = cf(State),
     parse_AttValue(Stream1, Stream1, 0, State1, DTD, External);
+parse_AttValue(no_bytes, _, _, State, _DTD, _External) ->
+    throw(incomplete_element);
 parse_AttValue(_, _, _, State, _DTD, _External) ->
     fatal_error(bad_attval, State).
 
@@ -3124,6 +3130,8 @@ parse_ExternalID_public(?MATCH) ->
 %%----------------------------------------------------------------------
 %% [11] SystemLiteral ::= ('"' [^"]* '"') | ("'" [^']* "'")
 %%----------------------------------------------------------------------
+parse_SystemLiteral(no_bytes, _, _, _) ->
+    throw(incomplete_element);
 parse_SystemLiteral(<<>>, _, _, State) ->
     {Stream1, State1} = cf(State),
     parse_SystemLiteral(Stream1, Stream1, 0, State1);
@@ -3196,6 +3204,8 @@ parse_PubidLiteral(<<$'/utf8, Rest/bitstring>>, Stream, Pos, State) ->
     parse_PubidLiteral_sq(Rest, Stream, Pos + 1, 0, State, []);
 parse_PubidLiteral(<<$"/utf8, Rest/bitstring>>, Stream, Pos, State) ->
     parse_PubidLiteral_dq(Rest, Stream, Pos + 1, 0, State, []);
+parse_PubidLiteral(no_bytes, _, _, _) ->
+    throw(incomplete_element);
 parse_PubidLiteral(_, _, _, State) ->
     fatal_error(bad_pubid, State).
 
