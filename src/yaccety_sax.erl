@@ -147,6 +147,8 @@ next_event(#ys_state{position = [Position | Ps], rest_stream = Stream} = State) 
             case ys_parse:parse_Misc(Stream, State) of
                 {no_bytes, State1} ->
                     event_endDocument(State1#ys_state{rest_stream = <<>>});
+                {keep_rest, State1} ->
+                    event_endDocument(State1);
                 {Event, State1} ->
                     {Event, State1};
                 State1 ->
