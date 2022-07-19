@@ -23,6 +23,7 @@
     proc_inst = true,
     standalone = false,
     namespace_aware = true,
+    multiple_documents = false,
     external = undefined
 }).
 

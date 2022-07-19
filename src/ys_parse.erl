@@ -49,8 +49,6 @@ cf(#ys_state{continuation = undefined} = State) ->
 cf(#ys_state{continuation = {CF, replacement}, tags = Tags}) ->
     {Bytes, State} = CF(replacement),
     {Bytes, State#ys_state{tags = Tags}};
-cf(#ys_state{continuation = {_CF, keep_rest}} = State) ->
-    {keep_rest, State};
 cf(#ys_state{continuation = {CF, CS}} = State) ->
     case CF(CS) of
         {Bin, CS1} when is_binary(Bin) ->

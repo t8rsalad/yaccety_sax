@@ -42,6 +42,8 @@
     | {dtd, processed_dtd()}
     %% Continuation fun and State
     | {continuation, {Fun :: fun(), State :: any()}}
+    %% could the stream source contain multiple documents?
+    | {multiple_documents, boolean()}
     %% External entity reader fun, if any
     | {external, Fun :: fun()}
 ].
@@ -89,6 +91,8 @@ opts([{whitespace, Bool} | T], Acc) when is_boolean(Bool) ->
     opts(T, Acc#ys_state{whitespace = Bool});
 opts([{namespace_aware, Bool} | T], Acc) when is_boolean(Bool) ->
     opts(T, Acc#ys_state{namespace_aware = Bool});
+opts([{multiple_documents, Bool} | T], Acc) when is_boolean(Bool) ->
+    opts(T, Acc#ys_state{multiple_documents = Bool});
 opts([], Acc) ->
     Acc;
 opts([H | _], _) ->
@@ -147,10 +151,10 @@ next_event(#ys_state{position = [Position | Ps], rest_stream = Stream} = State) 
             case ys_parse:parse_Misc(Stream, State) of
                 {no_bytes, State1} ->
                     event_endDocument(State1#ys_state{rest_stream = <<>>});
-                {keep_rest, State1} ->
-                    event_endDocument(State1);
                 {Event, State1} ->
                     {Event, State1};
+                State1 when State1#ys_state.multiple_documents ->
+                    event_endDocument(State1);
                 State1 ->
                     fatal_error(illegal_data, {Stream, State1})
             end
