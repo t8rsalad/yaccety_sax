@@ -19,7 +19,13 @@
 -include("yaccety_sax.hrl").
 
 -define(APPEND(Thing, Acc), append(Thing, Acc)).
--define(ACC(Stream, Pos, Len, Acc), ?APPEND(binary_part(Stream, Pos, Len), Acc)).
+-define(ACC(Stream, Pos, Len, Acc),
+            case Stream of
+                no_bytes ->
+                    throw(incomplete_element);
+                _ ->
+                    ?APPEND(binary_part(Stream, Pos, Len), Acc)
+            end).
 
 -define(MATCH, Bytes, Stream, Pos, State).
 -define(MATCH1, Bytes1, Stream1, Pos1, State1).
